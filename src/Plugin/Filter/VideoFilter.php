@@ -52,6 +52,149 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
    * {@inheritdoc}
    */
   public function process($text, $langcode) {
+    if (preg_match_all('/\[video(\:(.+))?( .+)?\]/isU', $text, $matches_code)) {
+      foreach ($matches_code[0] as $ci => $code) {
+        $video = array(
+          'source' => $matches_code[2][$ci],
+          'autoplay' => $this->settings['video_filter_autoplay'],
+          'related' => $this->settings['video_filter_related'],
+        );
+
+        // Pick random out of multiple sources separated by comma (,).
+        if (strstr($video['source'], ',')) {
+          $sources          = explode(',', $video['source']);
+          $random           = array_rand($sources, 1);
+          $video['source']  = $sources[$random];
+        }
+
+        // Load all codecs.
+        $manager = $this->plugin_manager;
+        $plugins = $manager->getDefinitions();
+
+        $video['ratio'] = $codec->getRatio();
+        $video['control_bar_height'] = $codec->getControlBarHeight();
+
+        // Find codec.
+        foreach ($plugins as $id => $codec) {
+          $codec = $manager->createInstance($codec['id']);
+
+          $codec_name = $codec->getName();
+          $regexp = $codec->getRegexp();
+
+          if (!is_array($regexp)) {
+            $codec['regexp'][] = $regexp;
+          }
+
+          // Try different regular expressions.
+          foreach ($codec['regexp'] as $delta => $regexp) {
+            if (preg_match($regexp, $video['source'], $matches)) {
+              $video['codec'] = $codec;
+              $video['codec']['delta'] = $delta;
+              $video['codec']['matches'] = $matches;
+              // Used in theme function:
+              $video['codec']['codec_name'] = $codec_name;
+              break 2;
+            }
+          }
+        }
+
+        // Codec found.
+        if (isset($video['codec'])) {
+          // Override default attributes.
+          if ($matches_code[3][$ci] && preg_match_all('/\s+([a-zA-Z_]+)\:(\s+)?([0-9a-zA-Z\/]+)/i', $matches_code[3][$ci], $matches_attributes)) {
+            foreach ($matches_attributes[0] as $ai => $attribute) {
+              $video[$matches_attributes[1][$ai]] = $matches_attributes[3][$ai];
+            }
+          }
+
+          // Use configured ratio if present, otherwise use that from the codec,
+          // if set. Fall back to 1.
+          $ratio = 1;
+          if (isset($video['ratio']) && preg_match('/(\d+)\/(\d+)/', $video['ratio'], $tratio)) {
+            // Validate given ratio parameter.
+            $ratio = $tratio[1] / $tratio[2];
+          }
+          elseif (isset($video['codec']['ratio'])) {
+            $ratio = $video['codec']['ratio'];
+          }
+
+          // Sets video width & height after any user input has been parsed.
+          // First, check if user has set a width.
+          if (isset($video['width']) && !isset($video['height'])) {
+            $video['height'] = $this->settings['height'];
+          }
+          // Else, if user has set height.
+          elseif (isset($video['height']) && !isset($video['width'])) {
+            $video['width'] = $video['height'] * $ratio;
+          }
+          // Maybe both?
+          elseif (isset($video['height']) && isset($video['width'])) {
+            $video['width'] = $video['width'];
+            $video['height'] = $video['height'];
+          }
+          // Fall back to defaults.
+          elseif (!isset($video['height']) && !isset($video['width'])) {
+            $video['width'] = $this->settings['width'] != '' ? $this->settings['width'] : 400;
+            $video['height'] = $this->settings['height'] != '' ? $this->settings['height'] : 400;
+          }
+
+          // Default value for control bar height.
+          $control_bar_height = 0;
+          if (isset($video['control_bar_height'])) {
+            // Respect control_bar_height option if present.
+            $control_bar_height = $video['control_bar_height'];
+          }
+          elseif (isset($video['codec']['control_bar_height'])) {
+            // Respect setting provided by codec otherwise.
+            $control_bar_height = $video['codec']['control_bar_height'];
+          }
+
+          // Resize to fit within width and height repecting aspect ratio.
+          if ($ratio) {
+            $scale_factor = min(array(
+              ($video['height'] - $control_bar_height),
+              $video['width'] / $ratio,
+            ));
+            $video['height'] = round($scale_factor + $control_bar_height);
+            $video['width'] = round($scale_factor * $ratio);
+          }
+
+          $video['autoplay'] = (bool) $video['autoplay'];
+          $video['align'] = (isset($video['align']) && in_array($video['align'], array(
+            'left',
+            'right',
+            'center',
+          ))) ? $video['align'] : NULL;
+
+          // Let modules have final say on video parameters.
+          // drupal_alter('video_filter_video', $video);
+
+          $html5 = $codec->html5($video);
+          $flash = $codec->flash($video);
+          $html = $codec->html($video);
+
+          if (!empty($html5) && $this->settings['html5'] == TRUE) {
+            $replacement = $html5;
+          }
+          elseif (!empty($flash)) {
+            $replacement = $flash;
+          }
+          elseif (!empty($html)) {
+            $replacement = $html;
+          }
+          else {
+            // Invalid callback.
+            $replacement = '<!-- VIDEO FILTER - INVALID CALLBACK IN: ' . $pattern . ' -->';
+          }
+        }
+        // Invalid format.
+        else {
+          $replacement = '<!-- VIDEO FILTER - INVALID CODEC IN: ' . $code . ' -->';
+        }
+
+        $text = str_replace($code, $replacement, $text);
+      }
+    }
     return new FilterProcessResult( $text );
   }
 
