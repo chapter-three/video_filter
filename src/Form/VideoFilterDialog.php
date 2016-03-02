@@ -38,6 +38,15 @@ class VideoFilterDialog extends FormBase {
     // provided by the editor plugin opening the dialog.
     $user_input = $form_state->getUserInput();
     $input = isset($user_input['editor_object']) ? $user_input['editor_object'] : [];
+/*
+    if (isset($form_state->getUserInput()['editor_object'])) {
+      $input = $form_state->getUserInput()['editor_object'];
+      $form_state->set('input', $input);
+      $form_state->setCached(TRUE);
+    }
+    else {
+      $input = $form_state->get('input') ?: [];
+    }*/
 
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'editor/drupal.editor.dialog';

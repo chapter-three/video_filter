@@ -53,7 +53,7 @@ interface VideoFilterInterface extends PluginInspectionInterface {
    *
    * @return string
    */
-  public function Instructions();
+  public function instructions();
 
   /**
    * Return video HTML5 video.

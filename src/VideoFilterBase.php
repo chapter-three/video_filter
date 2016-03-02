@@ -48,7 +48,7 @@ class VideoFilterBase extends PluginBase implements VideoFilterInterface {
   /**
    * Get Video Filter coded usage instructions.
    */
-  public function Instructions() {
+  public function instructions() {
     // Return text of the instruction for the codec.
   }
 
