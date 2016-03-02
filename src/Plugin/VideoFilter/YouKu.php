@@ -4,7 +4,7 @@
  * Contains \Drupal\video_filter\Plugin\VideoFilter\YouKu.
  */
 
-namespace Drupal\video_filter\Plugin\YouKu;
+namespace Drupal\video_filter\Plugin\VideoFilter;
 
 use Drupal\video_filter\VideoFilterBase;
 

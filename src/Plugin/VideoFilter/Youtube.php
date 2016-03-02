@@ -4,7 +4,7 @@
  * Contains \Drupal\video_filter\Plugin\VideoFilter\Youtube.
  */
 
-namespace Drupal\video_filter\Plugin\Youtube;
+namespace Drupal\video_filter\Plugin\VideoFilter;
 
 use Drupal\video_filter\VideoFilterBase;
 

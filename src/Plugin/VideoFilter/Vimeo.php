@@ -4,7 +4,7 @@
  * Contains \Drupal\video_filter\Plugin\VideoFilter\Vimeo.
  */
 
-namespace Drupal\video_filter\Plugin\Vimeo;
+namespace Drupal\video_filter\Plugin\VideoFilter;
 
 use Drupal\video_filter\VideoFilterBase;
 
