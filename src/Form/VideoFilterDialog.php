@@ -14,11 +14,29 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\editor\Ajax\EditorDialogSave;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides Video Filter dialog for text editors.
  */
-class VideoFilterDialog extends FormBase {
+class VideoFilterDialog extends FormBase implements ContainerInjectionInterface {
+
+  private $plugin_manager;
+
+  /**
+   * Implements __construct().
+   */
+  public function __construct() {
+    $this->plugin_manager = \Drupal::service('plugin.manager.video_filter');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('module_handler'));
+  }
 
   /**
    * {@inheritdoc}
@@ -38,15 +56,6 @@ class VideoFilterDialog extends FormBase {
     // provided by the editor plugin opening the dialog.
     $user_input = $form_state->getUserInput();
     $input = isset($user_input['editor_object']) ? $user_input['editor_object'] : [];
-/*
-    if (isset($form_state->getUserInput()['editor_object'])) {
-      $input = $form_state->getUserInput()['editor_object'];
-      $form_state->set('input', $input);
-      $form_state->setCached(TRUE);
-    }
-    else {
-      $input = $form_state->get('input') ?: [];
-    }*/
 
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'editor/drupal.editor.dialog';
@@ -57,7 +66,6 @@ class VideoFilterDialog extends FormBase {
       '#title' => $this->t('Video URL'),
       '#type' => 'textfield',
       '#default_value' => isset($input['url']) ? $input['url'] : '',
-      '#description' => $this->t('Only the following services supported: <strong>Youtube</strong>, <strong>Vimeo</strong>, <strong>YouKu</strong>.<br/>Simply copy the URL and paste it into this field.'),
       '#maxlength' => 2048,
     ];
 
@@ -93,6 +101,28 @@ class VideoFilterDialog extends FormBase {
       '#title' => $this->t('Autoplay (optional)'),
       '#type' => 'checkbox',
       '#default_value' => !empty($input['autoplay']) ? TRUE : FALSE,
+    ];
+
+    $form['instructions'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Instructions'),
+      '#open' => FALSE,
+      '#weight' => 97,
+    ];
+
+    $text = '<p>' . $this->t('Insert a 3rd party video from one of the following providers.') . '</p>';
+
+    $manager = $this->plugin_manager;
+    $plugins = $manager->getDefinitions();
+    $supported = [];
+    foreach ($plugins as $codec) {
+      $codec = $manager->createInstance($codec['id']);
+      $supported[] = '<div><strong>' . $codec->getName() . '</strong>: <span class="example-url">' . $codec->getExampleUrl() . '</span></div>';
+    }
+
+    $form['instructions']['text'] = [
+      '#type' => 'item',
+      '#markup' => $text . implode("\n", $supported),
     ];
 
     $form['actions'] = [

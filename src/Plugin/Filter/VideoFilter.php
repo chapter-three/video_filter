@@ -61,23 +61,38 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
   public function tips($long = FALSE) {
     if ($long) {
       $tips = [];
+      $supported = [];
       $manager = $this->plugin_manager;
       $plugins = $manager->getDefinitions();
       foreach ($plugins as $codec) {
-        $instance = $manager->createInstance($codec['id']);
+        $codec = $manager->createInstance($codec['id']);
         // Get plugin/codec usage instructions.
-        $instructions = $instance->instructions();
+        $instructions = $codec->instructions();
+        $supported[] = '<strong>' . $codec->getName() . '</strong>';
         if (!empty($instructions)) {
           $tips[] = $instructions;
         }
       }
-      $build = [
-        '#theme' => 'item_list',
-        '#items' => $tips,
-      ];
-      if ($tips) {
-        return drupal_render($build);
-      }
+      return $this->t('
+        <p><strong>Video Filter</strong></p>
+        <p>You may insert videos from popular video sites by using a simple tag <code>[video:URL]</code>.</p>
+        <p>Examples:</p>
+        <ul>
+          <li>Single video:<br /><code>[video:http://www.youtube.com/watch?v=uN1qUeId]</code></li>
+          <li>Random video out of multiple:<br /><code>[video:http://www.youtube.com/watch?v=uN1qUeId1,http://www.youtube.com/watch?v=uN1qUeId2]</code></li>
+          <li>Override default autoplay setting: <code>[video:http://www.youtube.com/watch?v=uN1qUeId autoplay:1]</code></li>
+          <li>Override default width and height:<br /><code>[video:http://www.youtube.com/watch?v=uN1qUeId width:X height:Y]</code></li>
+          <li>Override default aspect ratio:<br /><code>[video:http://www.youtube.com/watch?v=uN1qUeId ratio:4/3]</code></li>
+          <li>Align the video:<br /><code>[video:http://www.youtube.com/watch?v=uN1qUeId align:right]</code></li>
+        </ul>
+        <p>Supported sites: !codecs.</p>
+        <p><strong>Special instructions:</strong></p>
+        <p><em>Some codecs need special input. You\'ll find those instructions here.</em></p>
+        <ul>!instructions</ul>', [
+          '!codecs' => implode(', ', $supported),
+          '!instructions' => implode('', $tips),
+        ]
+      );
     }
     else {
       return $this->t('You may insert videos with [video:URL]');
