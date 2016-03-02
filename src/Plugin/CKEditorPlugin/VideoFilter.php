@@ -49,7 +49,7 @@ class VideoFilter extends PluginBase implements CKEditorPluginInterface, CKEdito
    * {@inheritdoc}
    */
   public function getFile() {
-    return drupal_get_path('module', 'video_filter') . '/assets/video_filter.js';
+    return __DIR__ . '../../../assets/video_filter.js';
   }
  
   /**
@@ -59,7 +59,7 @@ class VideoFilter extends PluginBase implements CKEditorPluginInterface, CKEdito
     return [
       'video_filter' => [
         'label' => t('Video Filter'),
-        'image' => drupal_get_path('module', 'video_filter') . '/assets/icon.png',
+        'image' => __DIR__ . '../../../assets/icon.png',
       ]
     ];
   }
