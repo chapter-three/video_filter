@@ -71,9 +71,6 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
         $manager = $this->plugin_manager;
         $plugins = $manager->getDefinitions();
 
-        $video['ratio'] = $codec->getRatio();
-        $video['control_bar_height'] = $codec->getControlBarHeight();
-
         // Find codec.
         foreach ($plugins as $id => $codec) {
           $codec = $manager->createInstance($codec['id']);
@@ -88,6 +85,8 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           // Try different regular expressions.
           foreach ($codec['regexp'] as $delta => $regexp) {
             if (preg_match($regexp, $video['source'], $matches)) {
+              $video['ratio'] = $codec->getRatio();
+              $video['control_bar_height'] = $codec->getControlBarHeight();
               $video['codec'] = $codec;
               $video['codec']['delta'] = $delta;
               $video['codec']['matches'] = $matches;
