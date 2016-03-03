@@ -159,8 +159,8 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
 
-    //$shortcode = $ev->shortcode();
     // Generate shortcode here and pass it to the form.
+    $shortcode = $this->generateShortcut();
     if ( !empty($shortcode) ) {
       $form_state->setValue(['attributes', 'code'], $shortcode);
     }
@@ -179,6 +179,15 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
     }
 
     return $response;
+  }
+
+  /**
+   * Generate token [video] with the parameters specified in the dialog window.
+   */
+  protected function generateShortcut($url, $width = '', $height = '', $align = '', $autoplay = '') {
+    if (!empty($url)) {
+
+    }
   }
 
 }

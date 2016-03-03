@@ -35,7 +35,7 @@ class VideoFilterBase extends PluginBase implements VideoFilterInterface {
    * Get video player ratio.
    */
   public function getRatio() {
-    return $this->pluginDefinition['example_url'];
+    return $this->pluginDefinition['ratio'];
   }
 
   /**

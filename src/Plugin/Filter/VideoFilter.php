@@ -72,21 +72,24 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
         $plugins = $manager->getDefinitions();
 
         // Find codec.
-        foreach ($plugins as $id => $codec) {
-          $codec = $manager->createInstance($codec['id']);
+        foreach ($plugins as $id => $plugin) {
+          $plugin = $manager->createInstance($plugin['id']);
 
-          $codec_name = $codec->getName();
-          $regexp = $codec->getRegexp();
+          $codec_name = $plugin->getName();
+          $regexp = $plugin->getRegexp();
 
           if (!is_array($regexp)) {
             $codec['regexp'][] = $regexp;
+          }
+          else {
+            $codec['regexp'] = $regexp;
           }
 
           // Try different regular expressions.
           foreach ($codec['regexp'] as $delta => $regexp) {
             if (preg_match($regexp, $video['source'], $matches)) {
-              $video['ratio'] = $codec->getRatio();
-              $video['control_bar_height'] = $codec->getControlBarHeight();
+              $video['ratio'] = $plugin->getRatio();
+              $video['control_bar_height'] = $plugin->getControlBarHeight();
               $video['codec'] = $codec;
               $video['codec']['delta'] = $delta;
               $video['codec']['matches'] = $matches;
@@ -168,15 +171,27 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           // Let modules have final say on video parameters.
           // drupal_alter('video_filter_video', $video);
 
-          $html5 = $codec->html5($video);
-          $flash = $codec->flash($video);
-          $html = $codec->html($video);
+          $html5 = $plugin->html5($video);
+          $flash = $plugin->flash($video);
+          $html = $plugin->html($video);
 
           if (!empty($html5) && $this->settings['html5'] == TRUE) {
-            $replacement = $html5;
+            $video['url'] = !empty($html5['url']) ? $html5['url'] : '';
+            $element = [
+              '#theme' => 'video_filter_iframe',
+              '#video' => $video,
+              '#params' => !empty($html5['params']) ? $html5['params'] : []
+            ];
+            $replacement = drupal_render($element);
           }
           elseif (!empty($flash)) {
-            $replacement = $flash;
+            $video['url'] = !empty($flash['url']) ? $flash['url'] : '';
+            $element = [
+              '#theme' => 'video_filter_iframe',
+              '#video' => $video,
+              '#params' => !empty($flash['params']) ? $flash['params'] : []
+            ];
+            $replacement = drupal_render($element);
           }
           elseif (!empty($html)) {
             $replacement = $html;
@@ -206,11 +221,11 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
       $supported = [];
       $manager = $this->plugin_manager;
       $plugins = $manager->getDefinitions();
-      foreach ($plugins as $codec) {
-        $codec = $manager->createInstance($codec['id']);
+      foreach ($plugins as $plugin) {
+        $plugin = $manager->createInstance($plugin['id']);
         // Get plugin/codec usage instructions.
-        $instructions = $codec->instructions();
-        $supported[] = '<strong>' . $codec->getName() . '</strong>';
+        $instructions = $plugin->instructions();
+        $supported[] = '<strong>' . $plugin->getName() . '</strong>';
         if (!empty($instructions)) {
           $tips[] = $instructions;
         }

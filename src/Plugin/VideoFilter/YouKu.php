@@ -30,7 +30,7 @@ class YouKu extends VideoFilterBase {
    */
   public function html5($video) {
     return [
-      'source' => 'http://player.youku.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'url' => 'http://player.youku.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
     ];
   }
 

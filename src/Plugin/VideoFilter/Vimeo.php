@@ -29,7 +29,7 @@ class Vimeo extends VideoFilterBase {
    */
   public function html5($video) {
     return [
-      'source' => 'http://player.vimeo.com/video/' . $video['codec']['matches'][1] . ($video['autoplay'] ? '?autoplay=1' : ''),
+      'url' => 'http://player.vimeo.com/video/' . $video['codec']['matches'][1] . ($video['autoplay'] ? '?autoplay=1' : ''),
     ];
   }
 
@@ -38,7 +38,7 @@ class Vimeo extends VideoFilterBase {
    */
   public function flash($video) {
     return [
-      'source' => 'http://www.vimeo.com/moogaloop.swf?clip_id=' . $video['codec']['matches'][1] . '&amp;server=www.vimeo.com&amp;fullscreen=1&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=&amp;autoplay=' . $video['autoplay'],
+      'url' => 'http://www.vimeo.com/moogaloop.swf?clip_id=' . $video['codec']['matches'][1] . '&amp;server=www.vimeo.com&amp;fullscreen=1&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=&amp;autoplay=' . $video['autoplay'],
     ];
   }
 

@@ -36,7 +36,7 @@ class Youtube extends VideoFilterBase {
       'wmode' => 'wmode=opaque',
     ];
     return [
-      'source' => 'http://www.youtube.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'url' => 'http://www.youtube.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
     ];
   }
 
@@ -50,7 +50,7 @@ class Youtube extends VideoFilterBase {
       'fs' => 'fs=1',
     ];
     return [
-      'source' => 'http://www.youtube.com/v/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'url' => 'http://www.youtube.com/v/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
       'params' => [
         'wmode' => 'opaque',
       ],
