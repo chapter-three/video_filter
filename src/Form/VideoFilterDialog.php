@@ -162,19 +162,19 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
     // Generate shortcut/token code.
     $shortcode = '[video:';
     if ($form_state->getValue('url')) {
-      $shortcode .= $form_state->getValue('url') . ' ';
+      $shortcode .= $form_state->getValue('url');
     }
     if ($form_state->getValue('width')) {
-      $shortcode .= 'width: ' . $form_state->getValue('width') . ' ';
+      $shortcode .= ' width: ' . $form_state->getValue('width');
     }
     if ($form_state->getValue('height')) {
-      $shortcode .= 'height: ' . $form_state->getValue('height') . ' ';
+      $shortcode .= ' height: ' . $form_state->getValue('height');
     }
     if ($form_state->getValue('align') && $form_state->getValue('align') != 'none') {
-      $shortcode .= 'align: ' . $form_state->getValue('align') . ' ';
+      $shortcode .= ' align: ' . $form_state->getValue('align');
     }
     if ($form_state->getValue('autoplay')) {
-      $shortcode .= 'autoplay: ' . $form_state->getValue('autoplay') . ' ';
+      $shortcode .= ' autoplay: ' . $form_state->getValue('autoplay');
     }
     $shortcode .= ']';
 
