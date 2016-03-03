@@ -35,14 +35,14 @@ class VideoFilterBase extends PluginBase implements VideoFilterInterface {
    * Get video player ratio.
    */
   public function getRatio() {
-    return $this->pluginDefinition['ratio'];
+    return !empty($this->pluginDefinition['ratio']) ? $this->pluginDefinition['ratio'] : '';
   }
 
   /**
    * Get video player control bar height.
    */
   public function getControlBarHeight() {
-    return $this->pluginDefinition['control_bar_height'];
+    return !empty($this->pluginDefinition['control_bar_height']) ? $this->pluginDefinition['control_bar_height'] : '';
   }
 
   /**

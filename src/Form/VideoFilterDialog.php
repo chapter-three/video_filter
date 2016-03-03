@@ -160,9 +160,11 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
     $response = new AjaxResponse();
 
     // Generate shortcut/token code.
+    $url_valid = FALSE;
     $shortcode = '[video:';
     if ($form_state->getValue('url')) {
       $shortcode .= $form_state->getValue('url');
+      $url_valid = TRUE;
     }
     if ($form_state->getValue('width')) {
       $shortcode .= ' width: ' . $form_state->getValue('width');
@@ -178,7 +180,7 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
     }
     $shortcode .= ']';
 
-    if ( !empty($shortcode) ) {
+    if ( !empty($shortcode) && $url_valid ) {
       $form_state->setValue(['attributes', 'code'], $shortcode);
     }
 
