@@ -56,8 +56,8 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
       foreach ($matches_code[0] as $ci => $code) {
         $video = array(
           'source' => $matches_code[2][$ci],
-          'autoplay' => $this->settings['video_filter_autoplay'],
-          'related' => $this->settings['video_filter_related'],
+          'autoplay' => $this->settings['autoplay'],
+          'related' => $this->settings['related'],
         );
 
         // Pick random out of multiple sources separated by comma (,).
@@ -78,6 +78,7 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           $codec_name = $plugin->getName();
           $regexp = $plugin->getRegexp();
 
+          $codec = [];
           if (!is_array($regexp)) {
             $codec['regexp'][] = $regexp;
           }
@@ -88,10 +89,10 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           // Try different regular expressions.
           foreach ($codec['regexp'] as $delta => $regexp) {
             if (preg_match($regexp, $video['source'], $matches)) {
-              $video['ratio'] = $plugin->getRatio();
-              $video['control_bar_height'] = $plugin->getControlBarHeight();
               $video['codec'] = $codec;
               $video['codec']['delta'] = $delta;
+              $video['codec']['ratio'] = $plugin->getRatio();
+              $video['codec']['control_bar_height'] = $plugin->getControlBarHeight();
               $video['codec']['matches'] = $matches;
               // Used in theme function:
               $video['codec']['codec_name'] = $codec_name;
@@ -162,11 +163,11 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           }
 
           $video['autoplay'] = (bool) $video['autoplay'];
-          $video['align'] = (isset($video['align']) && in_array($video['align'], array(
+          $video['align'] = (isset($video['align']) && in_array($video['align'], [
             'left',
             'right',
             'center',
-          ))) ? $video['align'] : NULL;
+          ])) ? $video['align'] : NULL;
 
           // Let modules have final say on video parameters.
           // drupal_alter('video_filter_video', $video);
@@ -187,14 +188,18 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           elseif (!empty($flash)) {
             $video['url'] = !empty($flash['url']) ? $flash['url'] : '';
             $element = [
-              '#theme' => 'video_filter_iframe',
+              '#theme' => 'video_filter_flash',
               '#video' => $video,
               '#params' => !empty($flash['params']) ? $flash['params'] : []
             ];
             $replacement = drupal_render($element);
           }
           elseif (!empty($html)) {
-            $replacement = $html;
+            $element = [
+              '#theme' => 'video_filter_html',
+              '#video' => $html,
+            ];
+            $replacement = drupal_render($element);
           }
           else {
             // Invalid callback.

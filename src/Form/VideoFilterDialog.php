@@ -159,8 +159,25 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
 
-    // Generate shortcode here and pass it to the form.
-    $shortcode = $this->generateShortcut();
+    // Generate shortcut/token code.
+    $shortcode = '[video:';
+    if ($form_state->getValue('url')) {
+      $shortcode .= $form_state->getValue('url') . ' ';
+    }
+    if ($form_state->getValue('width')) {
+      $shortcode .= 'width: ' . $form_state->getValue('width') . ' ';
+    }
+    if ($form_state->getValue('height')) {
+      $shortcode .= 'height: ' . $form_state->getValue('height') . ' ';
+    }
+    if ($form_state->getValue('align') && $form_state->getValue('align') != 'none') {
+      $shortcode .= 'align: ' . $form_state->getValue('align') . ' ';
+    }
+    if ($form_state->getValue('autoplay')) {
+      $shortcode .= 'autoplay: ' . $form_state->getValue('autoplay') . ' ';
+    }
+    $shortcode .= ']';
+
     if ( !empty($shortcode) ) {
       $form_state->setValue(['attributes', 'code'], $shortcode);
     }
@@ -179,15 +196,6 @@ class VideoFilterDialog extends FormBase implements ContainerInjectionInterface 
     }
 
     return $response;
-  }
-
-  /**
-   * Generate token [video] with the parameters specified in the dialog window.
-   */
-  protected function generateShortcut($url, $width = '', $height = '', $align = '', $autoplay = '') {
-    if (!empty($url)) {
-
-    }
   }
 
 }
