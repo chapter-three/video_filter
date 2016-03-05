@@ -18,7 +18,7 @@ use Drupal\video_filter\VideoFilterBase;
  *   regexp = {
  *     "/capped\.tv\/([a-zA-Z0-9\-_]+)/",
  *   },
- *   ratio = "425 / 355",
+ *   ratio = "425/355",
  * )
  */
 class Capped extends VideoFilterBase {
@@ -28,7 +28,7 @@ class Capped extends VideoFilterBase {
    */
   public function flash($video) {
     return [
-      'url' => 'http://capped.micksam7.com/playeralt.swf?vid=' . $video['codec']['matches'][1],
+      'src' => 'http://capped.micksam7.com/playeralt.swf?vid=' . $video['codec']['matches'][1],
     ];
   }
 

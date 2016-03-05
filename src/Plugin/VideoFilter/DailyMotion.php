@@ -18,7 +18,7 @@ use Drupal\video_filter\VideoFilterBase;
  *   regexp = {
  *     "/dailymotion\.com\/video\/([a-z0-9\-_]+)/i",
  *   },
- *   ratio = "4 / 3",
+ *   ratio = "4/3",
  *   control_bar_height = 20,
  * )
  */
@@ -29,7 +29,7 @@ class DailyMotion extends VideoFilterBase {
    */
   public function flash($video) {
     return [
-      'url' => 'http://www.dailymotion.com/swf/' . $video['codec']['matches'][1],
+      'src' => 'http://www.dailymotion.com/swf/' . $video['codec']['matches'][1],
     ];
   }
 

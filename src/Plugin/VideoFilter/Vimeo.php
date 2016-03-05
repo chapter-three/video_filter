@@ -18,7 +18,7 @@ use Drupal\video_filter\VideoFilterBase;
  *   regexp = {
  *     "/vimeo\.com\/([0-9]+)/",
  *   },
- *   ratio = "16 / 9",
+ *   ratio = "16/9",
  *   control_bar_height = 0
  * )
  */
@@ -27,9 +27,9 @@ class Vimeo extends VideoFilterBase {
   /**
    * {@inheritdoc}
    */
-  public function html5($video) {
+  public function iframe($video) {
     return [
-      'url' => 'http://player.vimeo.com/video/' . $video['codec']['matches'][1] . ($video['autoplay'] ? '?autoplay=1' : ''),
+      'src' => 'http://player.vimeo.com/video/' . $video['codec']['matches'][1] . ($video['autoplay'] ? '?autoplay=1' : ''),
     ];
   }
 
@@ -38,7 +38,7 @@ class Vimeo extends VideoFilterBase {
    */
   public function flash($video) {
     return [
-      'url' => 'http://www.vimeo.com/moogaloop.swf?clip_id=' . $video['codec']['matches'][1] . '&amp;server=www.vimeo.com&amp;fullscreen=1&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=&amp;autoplay=' . $video['autoplay'],
+      'src' => 'http://www.vimeo.com/moogaloop.swf?clip_id=' . $video['codec']['matches'][1] . '&amp;server=www.vimeo.com&amp;fullscreen=1&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=&amp;autoplay=' . $video['autoplay'],
     ];
   }
 

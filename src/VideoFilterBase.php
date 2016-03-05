@@ -7,8 +7,11 @@
 namespace Drupal\video_filter;
 
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 class VideoFilterBase extends PluginBase implements VideoFilterInterface {
+
+  use StringTranslationTrait;
 
   /**
    * Get plugin name.
@@ -35,7 +38,11 @@ class VideoFilterBase extends PluginBase implements VideoFilterInterface {
    * Get video player ratio.
    */
   public function getRatio() {
-    return !empty($this->pluginDefinition['ratio']) ? $this->pluginDefinition['ratio'] : '';
+    $ratio = !empty($this->pluginDefinition['ratio']) ? $this->pluginDefinition['ratio'] : '';
+    if (!empty($ratio) && preg_match('/(\d+)\/(\d+)/', $ratio, $tratio)) {
+      return $tratio[1] / $tratio[2];
+    }
+    return 1;
   }
 
   /**
@@ -55,7 +62,7 @@ class VideoFilterBase extends PluginBase implements VideoFilterInterface {
   /**
    * HTML5 video (iframe).
    */
-  public function html5($video) {
+  public function iframe($video) {
     // Return HTML5 URL to the video
     // This URL will be passed int iframe.
   }

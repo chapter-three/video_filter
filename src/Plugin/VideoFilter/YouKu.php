@@ -19,7 +19,7 @@ use Drupal\video_filter\VideoFilterBase;
  *     "/youku\.com\/v_show\/id_([a-z0-9\-_=]+)\.html/i",
  *     "/youku\.com\/player\.php\/sid\/([a-z0-9\-_]+)/i",
  *   },
- *   ratio = "16 / 9",
+ *   ratio = "16/9",
  *   control_bar_height = 50
  * )
  */
@@ -28,9 +28,12 @@ class YouKu extends VideoFilterBase {
   /**
    * {@inheritdoc}
    */
-  public function html5($video) {
+  public function iframe($video) {
+    $attributes = [
+      'autoplay' => !empty($video['autoplay']) ? 'autoplay=1' : 'autoplay=0',
+    ];
     return [
-      'url' => 'http://player.youku.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'src' => 'http://player.youku.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
     ];
   }
 

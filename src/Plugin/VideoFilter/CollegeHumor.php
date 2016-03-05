@@ -18,7 +18,7 @@ use Drupal\video_filter\VideoFilterBase;
  *   regexp = {
  *     "/collegehumor\.com\/video\:([0-9]+)/",
  *   },
- *   ratio = "16 / 9",
+ *   ratio = "16/9",
  *   control_bar_height = 0,
  * )
  */
@@ -29,7 +29,7 @@ class CollegeHumor extends VideoFilterBase {
    */
   public function flash($video) {
     return [
-      'url' => 'http://www.collegehumor.com/moogaloop/moogaloop.swf?clip_id=' . $video['codec']['matches'][1] . '&amp;fullscreen=1',
+      'src' => 'http://www.collegehumor.com/moogaloop/moogaloop.swf?clip_id=' . $video['codec']['matches'][1] . '&amp;fullscreen=1',
     ];
   }
 

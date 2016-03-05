@@ -56,11 +56,11 @@ interface VideoFilterInterface extends PluginInspectionInterface {
   public function instructions();
 
   /**
-   * Return video HTML5 video.
+   * Return video HTML5 video (iframe).
    *
    * @return url
    */
-  public function html5($video);
+  public function iframe($video);
 
   /**
    * Return Flash video (flv).

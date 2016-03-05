@@ -12,20 +12,17 @@ function video_filter_theme() {
   return [
     'video_filter_iframe' => [
       'variables' => [
-        'video'   => NULL,
-        'params'  => NULL,
+        'video'   => [],
       ],
     ],
     'video_filter_flash' => [
       'variables' => [
-        'video'   => NULL,
-        'params'  => NULL,
+        'video'   => [],
       ],
     ],
     'video_filter_html' => [
       'variables' => [
-        'video'   => NULL,
-        'params'  => NULL,
+        'video' => [],
       ],
     ],
   ];

@@ -25,7 +25,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     "height" = 400,
  *     "autoplay" = FALSE,
  *     "related" = FALSE,
- *     "html5" = TRUE,
  *   }
  * )
  */
@@ -53,38 +52,28 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
    */
   public function process($text, $langcode) {
     if (preg_match_all('/\[video(\:(.+))?( .+)?\]/isU', $text, $matches_code)) {
+      // Load all codecs.
+      $plugins = $this->plugin_manager->getDefinitions();
       foreach ($matches_code[0] as $ci => $code) {
-        $video = array(
-          'source' => $matches_code[2][$ci],
+        $video = [
+          'source'   => $matches_code[2][$ci],
           'autoplay' => $this->settings['autoplay'],
-          'related' => $this->settings['related'],
-        );
+          'related'  => $this->settings['related'],
+        ];
 
         // Pick random out of multiple sources separated by comma (,).
         if (strstr($video['source'], ',')) {
-          $sources          = explode(',', $video['source']);
-          $random           = array_rand($sources, 1);
-          $video['source']  = $sources[$random];
+          $sources         = explode(',', $video['source']);
+          $random          = array_rand($sources, 1);
+          $video['source'] = $sources[$random];
         }
 
-        // Load all codecs.
-        $manager = $this->plugin_manager;
-        $plugins = $manager->getDefinitions();
-
         // Find codec.
-        foreach ($plugins as $id => $plugin) {
-          $plugin = $manager->createInstance($plugin['id']);
-
-          $codec_name = $plugin->getName();
-          $regexp = $plugin->getRegexp();
-
+        foreach ($plugins as $plugin_info) {
+          $plugin = $this->plugin_manager->createInstance($plugin_info['id']);
           $codec = [];
-          if (!is_array($regexp)) {
-            $codec['regexp'][] = $regexp;
-          }
-          else {
-            $codec['regexp'] = $regexp;
-          }
+          $regexp = $plugin->getRegexp();
+          $codec['regexp'] = !is_array($regexp) ? [$regexp] : $regexp;
 
           // Try different regular expressions.
           foreach ($codec['regexp'] as $delta => $regexp) {
@@ -94,8 +83,7 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
               $video['codec']['ratio'] = $plugin->getRatio();
               $video['codec']['control_bar_height'] = $plugin->getControlBarHeight();
               $video['codec']['matches'] = $matches;
-              // Used in theme function:
-              $video['codec']['codec_name'] = $codec_name;
+              $video['codec']['id'] = $plugin_info['id'];
               break 2;
             }
           }
@@ -103,8 +91,9 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
 
         // Codec found.
         if (isset($video['codec'])) {
+
           // Override default attributes.
-          if ($matches_code[3][$ci] && preg_match_all('/\s+([a-zA-Z_]+)\:(\s+)?([0-9a-zA-Z\/]+)/i', $matches_code[3][$ci], $matches_attributes)) {
+          if (!empty($matches_code[3][$ci]) && preg_match_all('/\s+([a-zA-Z_]+)\:(\s+)?([0-9a-zA-Z\/]+)/i', $matches_code[3][$ci], $matches_attributes)) {
             foreach ($matches_attributes[0] as $ai => $attribute) {
               $video[$matches_attributes[1][$ai]] = $matches_attributes[3][$ai];
             }
@@ -113,18 +102,18 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           // Use configured ratio if present, otherwise use that from the codec,
           // if set. Fall back to 1.
           $ratio = 1;
-          if (isset($video['ratio']) && preg_match('/(\d+)\/(\d+)/', $video['ratio'], $tratio)) {
+          if (!empty($video['ratio']) && preg_match('/(\d+)\/(\d+)/', $video['ratio'], $tratio)) {
             // Validate given ratio parameter.
             $ratio = $tratio[1] / $tratio[2];
           }
-          elseif (isset($video['codec']['ratio'])) {
+          elseif (!empty($video['codec']['ratio'])) {
             $ratio = $video['codec']['ratio'];
           }
 
           // Sets video width & height after any user input has been parsed.
           // First, check if user has set a width.
           if (isset($video['width']) && !isset($video['height'])) {
-            $video['height'] = $this->settings['height'];
+            $video['height'] = $this->settings['height'] != '' ? $this->settings['height'] : 400;
           }
           // Else, if user has set height.
           elseif (isset($video['height']) && !isset($video['width'])) {
@@ -154,10 +143,10 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
 
           // Resize to fit within width and height repecting aspect ratio.
           if ($ratio) {
-            $scale_factor = min(array(
+            $scale_factor = min([
               ($video['height'] - $control_bar_height),
               $video['width'] / $ratio,
-            ));
+            ]);
             $video['height'] = round($scale_factor + $control_bar_height);
             $video['width'] = round($scale_factor * $ratio);
           }
@@ -170,40 +159,54 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
           ])) ? $video['align'] : NULL;
 
           // Let modules have final say on video parameters.
-          // drupal_alter('video_filter_video', $video);
+          \Drupal::moduleHandler()->alter('video_filter_video', $video);
 
-          $html5 = $plugin->html5($video);
+          $iframe = $plugin->iframe($video);
           $flash = $plugin->flash($video);
           $html = $plugin->html($video);
 
-          if (!empty($html5) && $this->settings['html5'] == TRUE) {
-            $video['url'] = !empty($html5['url']) ? $html5['url'] : '';
+          // Add CSS classes to elements.
+          $video['classes'] = $this->classes($video);
+
+          // iframe
+          if (!empty($iframe['src'])) {
+            $video['iframe'] = $iframe;
             $element = [
               '#theme' => 'video_filter_iframe',
               '#video' => $video,
-              '#params' => !empty($html5['params']) ? $html5['params'] : []
             ];
             $replacement = drupal_render($element);
           }
-          elseif (!empty($flash)) {
-            $video['url'] = !empty($flash['url']) ? $flash['url'] : '';
+          // flash
+          elseif (!empty($flash['src'])) {
+
+            $defaults = array(
+              'movie' => $video['source'],
+              'wmode' => 'transparent',
+              'allowFullScreen' => 'true',
+            );
+
+            $flash['properties'] = array_merge($defaults, (is_array($flash['properties']) && count($flash['properties'])) ? $flash['properties'] : []);
+
+            $video['flash'] = $flash;
             $element = [
               '#theme' => 'video_filter_flash',
               '#video' => $video,
-              '#params' => !empty($flash['params']) ? $flash['params'] : []
             ];
             $replacement = drupal_render($element);
           }
+          // html
           elseif (!empty($html)) {
+            $video['html'] = $html;
             $element = [
               '#theme' => 'video_filter_html',
-              '#video' => $html,
+              '#video' => $video,
             ];
             $replacement = drupal_render($element);
           }
           else {
-            // Invalid callback.
-            $replacement = '<!-- VIDEO FILTER - INVALID CALLBACK IN: ' . $pattern . ' -->';
+            // Plugin doesn't exists
+            $replacement = '<!-- VIDEO FILTER - PLUGIN DOES NOT EXISTS FOR: ' . $video['source'] . ' -->';
           }
         }
         // Invalid format.
@@ -218,16 +221,35 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
   }
 
   /**
+   * Video Filter classes.
+   */
+  private function classes($video) {
+    $classes = [
+      'video-' . $video['codec']['id'],
+    ];
+    // Add alignment.
+    if (isset($video['align'])) {
+      $classes[] = 'video-' . $video['align'];
+    }
+    // First match is the URL, we don't want that as a class.
+    unset($video['codec']['matches'][0]);
+    foreach ($video['codec']['matches'] as $match) {
+      $classes[] = 'vf-' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $match));
+    }
+    return $classes;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function tips($long = FALSE) {
+    // Show long description.
     if ($long) {
       $tips = [];
       $supported = [];
-      $manager = $this->plugin_manager;
-      $plugins = $manager->getDefinitions();
-      foreach ($plugins as $plugin) {
-        $plugin = $manager->createInstance($plugin['id']);
+      $plugins = $this->plugin_manager->getDefinitions();
+      foreach ($plugins as $plugin_info) {
+        $plugin = $this->plugin_manager->createInstance($plugin_info['id']);
         // Get plugin/codec usage instructions.
         $instructions = $plugin->instructions();
         $supported[] = '<strong>' . $plugin->getName() . '</strong>';
@@ -285,15 +307,9 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
     ];
     $form['related'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Show delated videos'),
+      '#title' => $this->t('Show related videos'),
       '#default_value' => $this->settings['related'],
       '#description' => $this->t('Not all video formats support this setting.'),
-    ];
-    $form['html5'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use HTML5'),
-      '#default_value' => $this->settings['html5'],
-      '#description' => $this->t('Use HTML5 if the codec provides it. Makes your videos more device agnostic.'),
     ];
     return $form;
   }

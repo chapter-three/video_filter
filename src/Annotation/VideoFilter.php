@@ -53,7 +53,7 @@ class VideoFilter extends Plugin {
   /**
    * The video player ratio.
    *
-   * @var string
+   * @var float
    */
   public $ratio;
 

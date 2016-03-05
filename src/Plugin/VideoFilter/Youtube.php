@@ -20,7 +20,7 @@ use Drupal\video_filter\VideoFilterBase;
  *     "/youtu.be\/([a-z0-9\-_]+)/i",
  *     "/youtube\.com\/v\/([a-z0-9\-_]+)/i",
  *   },
- *   ratio = "16 / 9",
+ *   ratio = "16/9",
  *   control_bar_height = 25
  * )
  */
@@ -29,14 +29,24 @@ class Youtube extends VideoFilterBase {
   /**
    * {@inheritdoc}
    */
-  public function html5($video) {
+  public function iframe($video) {
     $attributes = [
       'rel' => !empty($video['related']) ? 'rel=1' : 'rel=0',
       'autoplay' => !empty($video['autoplay']) ? 'autoplay=1' : 'autoplay=0',
       'wmode' => 'wmode=opaque',
     ];
+    // YouTube Playlist.
+    // Example URL: https://www.youtube.com/watch?v=YQHsXMglC9A&list=PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI
+    if (preg_match_all('/youtube\.com\/watch\?v=(.*)list=([a-z0-9\-_]+)/i', $video['source'], $matches)) {
+      if (!empty($matches[2][0])) {
+        $attributes['list'] = 'list=' . $matches[2][0];
+      }
+    }
     return [
-      'url' => 'http://www.youtube.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'src' => 'http://www.youtube.com/embed/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'properties' => [
+        'allowfullscreen' => 'true',
+      ],
     ];
   }
 
@@ -50,7 +60,7 @@ class Youtube extends VideoFilterBase {
       'fs' => 'fs=1',
     ];
     return [
-      'url' => 'http://www.youtube.com/v/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+      'src' => 'http://www.youtube.com/v/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
       'params' => [
         'wmode' => 'opaque',
       ],

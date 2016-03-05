@@ -18,7 +18,7 @@ use Drupal\video_filter\VideoFilterBase;
  *   regexp = {
  *     "/archive\.org\/details\/([\w-_]+)/i",
  *   },
- *   ratio = "4 / 3",
+ *   ratio = "4/3",
  * )
  */
 class ArchiveOrg extends VideoFilterBase {
@@ -26,9 +26,9 @@ class ArchiveOrg extends VideoFilterBase {
   /**
    * {@inheritdoc}
    */
-  public function html5($video) {
+  public function iframe($video) {
     return [
-      'url' => 'http://www.archive.org/embed/' . $video['codec']['matches'][1],
+      'src' => 'http://www.archive.org/embed/' . $video['codec']['matches'][1],
     ];
   }
 
