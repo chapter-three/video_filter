@@ -27,10 +27,34 @@ class DailyMotion extends VideoFilterBase {
   /**
    * {@inheritdoc}
    */
+  public function iframe($video) {
+  	$attributes = [
+      'autoplay' => $video['autoplay'] ? 'autoplay=1' : 'autoplay=0',
+    ];
+    return [
+      'src' => 'http://www.dailymotion.com/embed/video/' . $video['codec']['matches'][1] . '?' . implode('&amp;', $attributes),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function flash($video) {
     return [
       'src' => 'http://www.dailymotion.com/swf/' . $video['codec']['matches'][1],
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function options() {
+    $form = parent::options();
+    $form['autoplay'] = [
+      '#title' => $this->t('Autoplay (optional)'),
+      '#type' => 'checkbox',
+    ];
+    return $form;
   }
 
 }

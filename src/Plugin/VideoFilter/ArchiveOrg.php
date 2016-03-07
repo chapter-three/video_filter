@@ -16,7 +16,7 @@ use Drupal\video_filter\VideoFilterBase;
  *   name = @Translation("Archive.org"),
  *   example_url = "http://www.archive.org/details/DrupalconBoston2008-TheStateOfDrupal",
  *   regexp = {
- *     "/archive\.org\/details\/([\w-_]+)/i",
+ *     "/archive\.org\/details\/([\w-_\.]+)/i",
  *   },
  *   ratio = "4/3",
  * )

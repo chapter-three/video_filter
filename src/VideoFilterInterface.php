@@ -76,4 +76,11 @@ interface VideoFilterInterface extends PluginInspectionInterface {
    */
   public function html($video);
 
+  /**
+   * Return embed options (Form API elements).
+   *
+   * @return array (Drupal Form API)
+   */
+  public function options();
+
 }

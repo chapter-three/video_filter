@@ -28,8 +28,20 @@ class GameVideos extends VideoFilterBase {
    */
   public function flash($video) {
     return [
-      'src' => '//gamevideos.1up.com/swf/gamevideos12.swf?embedded=1&amp;fullscreen=1&amp;autoplay=0&amp;src=http://gamevideos.1up.com/do/videoListXML%3Fid%3D' . $video['codec']['matches'][1],
+      'src' => '//gamevideos.1up.com/swf/gamevideos12.swf?embedded=1&amp;fullscreen=1&amp;autoplay=' . (!empty($video['autoplay']) ? '1' : '0') .'&amp;src=http://gamevideos.1up.com/do/videoListXML%3Fid%3D' . $video['codec']['matches'][1],
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function options() {
+    $form = parent::options();
+    $form['autoplay'] = [
+      '#title' => $this->t('Autoplay (optional)'),
+      '#type' => 'checkbox',
+    ];
+    return $form;
   }
 
 }

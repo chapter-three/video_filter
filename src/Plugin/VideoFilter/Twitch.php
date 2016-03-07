@@ -41,4 +41,28 @@ class Twitch extends VideoFilterBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function options() {
+    $form['width'] = [
+      '#title' => $this->t('Width (optional)'),
+      '#type' => 'textfield',
+    ];
+    $form['height'] = [
+      '#title' => $this->t('Height (optional)'),
+      '#type' => 'textfield',
+    ];
+    $form['time'] = [
+      '#title' => $this->t('Time (optional)'),
+      '#type' => 'textfield',
+      '#description' => $this->t('Start time'),
+    ];
+    $form['autoplay'] = [
+      '#title' => $this->t('Autoplay (optional)'),
+      '#type' => 'checkbox',
+    ];
+    return $form;
+  }
+
 }

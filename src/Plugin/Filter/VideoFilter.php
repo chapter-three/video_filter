@@ -23,8 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   settings = {
  *     "width" = 400,
  *     "height" = 400,
- *     "autoplay" = FALSE,
- *     "related" = FALSE,
  *   }
  * )
  */
@@ -57,8 +55,6 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
       foreach ($matches_code[0] as $ci => $code) {
         $video = [
           'source'   => $matches_code[2][$ci],
-          'autoplay' => $this->settings['autoplay'],
-          'related'  => $this->settings['related'],
         ];
 
         // Pick random out of multiple sources separated by comma (,).
@@ -151,7 +147,6 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
             $video['width'] = round($scale_factor * $ratio);
           }
 
-          $video['autoplay'] = (bool) $video['autoplay'];
           $video['align'] = (isset($video['align']) && in_array($video['align'], [
             'left',
             'right',
@@ -289,27 +284,17 @@ class VideoFilter extends FilterBase implements ContainerInjectionInterface {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $form['width'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Default width setting'),
+      '#title' => $this->t('Player Width'),
+      '#description' => $this->t('Default width value'),
       '#default_value' => $this->settings['width'],
       '#maxlength' => 4,
     ];
     $form['height'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Default height setting'),
+      '#title' => $this->t('Player Height'),
+      '#description' => $this->t('Default height value'),
       '#default_value' => $this->settings['height'],
       '#maxlength' => 4,
-    ];
-    $form['autoplay'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Autoplay video'),
-      '#default_value' => $this->settings['autoplay'],
-      '#description' => $this->t('Not all video formats support this setting.'),
-    ];
-    $form['related'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show related videos'),
-      '#default_value' => $this->settings['related'],
-      '#description' => $this->t('Not all video formats support this setting.'),
     ];
     return $form;
   }

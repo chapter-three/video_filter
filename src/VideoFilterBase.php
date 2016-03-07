@@ -83,4 +83,20 @@ class VideoFilterBase extends PluginBase implements VideoFilterInterface {
     // with the FLV player.
   }
 
+  /**
+   * Embed options. (e.g. Autoplay, Width/Height)
+   * Uses Drupal's Form API
+   */
+  public function options() {
+    $form['width'] = [
+      '#title' => $this->t('Width (optional)'),
+      '#type' => 'textfield',
+    ];
+    $form['height'] = [
+      '#title' => $this->t('Height (optional)'),
+      '#type' => 'textfield',
+    ];
+    return $form;
+  }
+
 }

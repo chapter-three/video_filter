@@ -41,4 +41,35 @@ class Coub extends VideoFilterBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function options() {
+    $form['width'] = [
+      '#title' => $this->t('Width (optional)'),
+      '#type' => 'textfield',
+    ];
+    $form['height'] = [
+      '#title' => $this->t('Height (optional)'),
+      '#type' => 'textfield',
+    ];
+    $form['autoplay'] = [
+      '#title' => $this->t('Autoplay (optional)'),
+      '#type' => 'checkbox',
+    ];
+    $form['originalSize'] = [
+      '#title' => $this->t('Show original size (optional)'),
+      '#type' => 'checkbox',
+    ];
+    $form['startWithHD'] = [
+      '#title' => $this->t('Start with HD (optional)'),
+      '#type' => 'checkbox',
+    ];
+    $form['muted'] = [
+      '#title' => $this->t('Muted (optional)'),
+      '#type' => 'checkbox',
+    ];
+    return $form;
+  }
+
 }

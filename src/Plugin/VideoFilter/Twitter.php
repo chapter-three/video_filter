@@ -36,4 +36,11 @@ class Twitter extends VideoFilterBase {
     return $html;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function options() {
+    return [];
+  }
+
 }

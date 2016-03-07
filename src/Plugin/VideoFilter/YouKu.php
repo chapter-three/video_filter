@@ -37,4 +37,16 @@ class YouKu extends VideoFilterBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function options() {
+    $form = parent::options();
+    $form['autoplay'] = [
+      '#title' => $this->t('Autoplay (optional)'),
+      '#type' => 'checkbox',
+    ];
+    return $form;
+  }
+
 }
