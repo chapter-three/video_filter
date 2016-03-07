@@ -35,10 +35,10 @@ class TED extends VideoFilterBase {
    * {@inheritdoc}
    */
   public function iframe($video) {
-  	$video_id = $video['codec']['matches'][3];
-  	if (empty($video_id)) {
+    $video_id = $video['codec']['matches'][3];
+    if (empty($video_id)) {
       $video_id = $video['codec']['matches'][1];
-  	}
+    }
     return [
       'src' => 'https://embed-ssl.ted.com/talks/' . $video_id . '.html',
       'properties' => [

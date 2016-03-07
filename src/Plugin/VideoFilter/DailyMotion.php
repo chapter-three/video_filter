@@ -28,7 +28,7 @@ class DailyMotion extends VideoFilterBase {
    * {@inheritdoc}
    */
   public function iframe($video) {
-  	$attributes = [
+    $attributes = [
       'autoplay' => $video['autoplay'] ? 'autoplay=1' : 'autoplay=0',
     ];
     return [
